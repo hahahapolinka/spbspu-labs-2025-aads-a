@@ -12,7 +12,8 @@ namespace {
 
   bool has_higher_precedence(const std::string& op1, const std::string& op2)
   {
-    auto get_precedence = [](const std::string& op) {
+    auto get_precedence = [](const std::string& op)
+    {
       if (op == "+" || op == "-") {
         return 1;
       }
