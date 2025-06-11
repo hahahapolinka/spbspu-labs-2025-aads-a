@@ -499,7 +499,15 @@ namespace gavrilova {
   template < class T >
   typename FwdList< T >::Iterator FwdList< T >::insert(CIterator pos, T&& value)
   {
-    return insert(pos, value);
+    NodeFwdList< T >* node = pos.node_;
+    if (node == fake_) {
+      push_front(std::move(value));
+      return begin();
+    }
+    NodeFwdList< T >* node_next = node->next;
+    node->next = new NodeFwdList< T >{std::move(value), node_next};
+    ++nodeCount_;
+    return Iterator(node->next);
   }
 
   template < class T >

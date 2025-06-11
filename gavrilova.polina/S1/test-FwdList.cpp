@@ -1,5 +1,4 @@
 #include <boost/test/unit_test.hpp>
-#include <iostream>
 #include "ConstIteratorFwd.hpp"
 #include "FwdList.hpp"
 #include "IteratorFwd.hpp"
@@ -18,15 +17,17 @@ BOOST_AUTO_TEST_CASE(test_initializer_list_constructor)
   BOOST_TEST(list.front() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(test_copy_constructor) {
-  gavrilova::FwdList<int> original{1, 2, 3};
-  gavrilova::FwdList<int> copy(original);
+BOOST_AUTO_TEST_CASE(test_copy_constructor)
+{
+  gavrilova::FwdList< int > original{1, 2, 3};
+  gavrilova::FwdList< int > copy(original);
   BOOST_TEST(original == copy);
 }
 
-BOOST_AUTO_TEST_CASE(test_move_constructor) {
-  gavrilova::FwdList<int> temp{1, 2, 3};
-  gavrilova::FwdList<int> moved(std::move(temp));
+BOOST_AUTO_TEST_CASE(test_move_constructor)
+{
+  gavrilova::FwdList< int > temp{1, 2, 3};
+  gavrilova::FwdList< int > moved(std::move(temp));
   BOOST_TEST(moved.size() == 3);
   BOOST_TEST(temp.empty());
 }
@@ -73,8 +74,9 @@ BOOST_AUTO_TEST_CASE(test_remove)
   BOOST_TEST(*list.begin() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(test_remove_if) {
-  gavrilova::FwdList<int> list{1, 2, 3, 4, 5};
+BOOST_AUTO_TEST_CASE(test_remove_if)
+{
+  gavrilova::FwdList< int > list{1, 2, 3, 4, 5};
   list.remove_if([](int x)
   {
     return x % 2 == 0;
@@ -96,8 +98,8 @@ BOOST_AUTO_TEST_CASE(test_reverse)
 
 BOOST_AUTO_TEST_CASE(test_copy_assignment_operator)
 {
-  gavrilova::FwdList<int> list1{1, 2, 3};
-  gavrilova::FwdList<int> list2;
+  gavrilova::FwdList< int > list1{1, 2, 3};
+  gavrilova::FwdList< int > list2;
   list2 = list1;
 
   BOOST_TEST(list1 == list2);
@@ -109,15 +111,16 @@ BOOST_AUTO_TEST_CASE(test_copy_assignment_operator)
 
 BOOST_AUTO_TEST_CASE(test_self_assignment)
 {
-  gavrilova::FwdList<int> list{1, 2, 3};
+  gavrilova::FwdList< int > list{1, 2, 3};
+  list = list;
   BOOST_TEST(list.size() == 3);
   BOOST_TEST(list.front() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_move_assignment)
 {
-  gavrilova::FwdList<int> src{4, 5, 6};
-  gavrilova::FwdList<int> dst;
+  gavrilova::FwdList< int > src{4, 5, 6};
+  gavrilova::FwdList< int > dst;
   dst = std::move(src);
 
   BOOST_TEST(dst.size() == 3);
@@ -171,4 +174,3 @@ BOOST_AUTO_TEST_CASE(test_swap)
   BOOST_TEST(list1.size() == 3);
   BOOST_TEST(list2.size() == 2);
 }
-
