@@ -1,6 +1,8 @@
 #ifndef TWO_THREE_TREE_HPP
 #define TWO_THREE_TREE_HPP
 
+#include <Queue.hpp>
+#include <Stack.hpp>
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -78,6 +80,20 @@ namespace gavrilova {
 
     Value get(const Key& key);
     Node* get_node();
+
+    template < typename F >
+    F traverse_lnr(F f) const;
+    template < typename F >
+    F traverse_rnl(F f) const;
+    template < typename F >
+    F traverse_breadth(F f) const;
+
+    template < typename F >
+    F traverse_lnr(F f);
+    template < typename F >
+    F traverse_rnl(F f);
+    template < typename F >
+    F traverse_breadth(F f);
 
   private:
     Node* fake_;
@@ -714,6 +730,205 @@ namespace gavrilova {
   typename TwoThreeTree< Key, Value, Cmp >::Node* TwoThreeTree< Key, Value, Cmp >::get_node()
   {
     return (fake_->children[0] && !fake_->children[0]->is_fake) ? fake_->children[0] : nullptr;
+  }
+
+  template < class Key, class Value, class Comparator >
+  template < class F >
+  F TwoThreeTree< Key, Value, Comparator >::traverse_lnr(F f)
+  {
+    return static_cast< const TwoThreeTree& >(*this).traverse_lnr(f);
+  }
+
+  template < class Key, class Value, class Comparator >
+  template < class F >
+  F TwoThreeTree< Key, Value, Comparator >::traverse_lnr(F f) const
+  {
+    if (empty()) {
+      return f;
+    }
+
+    enum class LNRStage { GoLeft,
+      VisitLeft,
+      GoMiddle,
+      VisitRight,
+      GoRight };
+
+    Stack< std::pair< Node*, LNRStage > > stack;
+    stack.push({fake_->children[0], LNRStage::GoLeft});
+
+    while (!stack.empty()) {
+      Node* node = stack.top().first;
+      LNRStage& stage = stack.top().second;
+
+      if (node == fake_) {
+        stack.pop();
+        continue;
+      }
+
+      switch (stage) {
+        case LNRStage::GoLeft:
+          stage = LNRStage::VisitLeft;
+          stack.push({node->children[0], LNRStage::GoLeft});
+          break;
+
+        case LNRStage::VisitLeft:
+          stage = LNRStage::GoMiddle;
+          f(node->data[0]);
+          break;
+
+        case LNRStage::GoMiddle:
+          stage = LNRStage::VisitRight;
+          stack.push({node->children[1], LNRStage::GoLeft});
+          break;
+
+        case LNRStage::VisitRight:
+          stage = LNRStage::GoRight;
+          if (node->is_3_node) {
+            f(node->data[1]);
+          }
+          break;
+
+        case LNRStage::GoRight:
+          stack.pop();
+          if (node->is_3_node && node->children[2] != fake_) {
+            stack.push({node->children[2], LNRStage::GoLeft});
+          }
+          break;
+      }
+    }
+
+    return f;
+  }
+
+  template < class Key, class Value, class Comparator >
+  template < class F >
+  F TwoThreeTree< Key, Value, Comparator >::traverse_rnl(F f)
+  {
+    return static_cast< const TwoThreeTree& >(*this).traverse_rnl(f);
+  }
+
+  template < class Key, class Value, class Comparator >
+  template < class F >
+  F TwoThreeTree< Key, Value, Comparator >::traverse_rnl(F f) const
+  {
+    if (empty()) {
+      return f;
+    }
+
+    enum class RNLStage {
+      GoRight,
+      VisitRight,
+      GoMiddle,
+      VisitLeft,
+      GoLeft
+    };
+
+    Stack< std::pair< Node*, RNLStage > > stack;
+    if (fake_->children[0]->is_3_node) {
+      stack.push({fake_->children[0], RNLStage::GoRight});
+    } else {
+      stack.push({fake_->children[0], RNLStage::GoMiddle});
+    }
+
+    while (!stack.empty()) {
+      Node* node = stack.top().first;
+      RNLStage& stage = stack.top().second;
+
+      if (node == fake_) {
+        stack.pop();
+        continue;
+      }
+
+      switch (stage) {
+        case RNLStage::GoRight:
+          if (node->is_3_node) {
+            stage = RNLStage::VisitRight;
+            if (node->children[2]->is_3_node) {
+              stack.push({node->children[2], RNLStage::GoRight});
+            } else {
+              stack.push({node->children[2], RNLStage::GoMiddle});
+            }
+          }
+          break;
+
+        case RNLStage::VisitRight:
+          stage = RNLStage::GoMiddle;
+          if (node->is_3_node) {
+            f(node->data[1]);
+          }
+          break;
+
+        case RNLStage::GoMiddle:
+          stage = RNLStage::VisitLeft;
+          if (node->children[1]->is_3_node) {
+            stack.push({node->children[1], RNLStage::GoRight});
+          } else {
+            stack.push({node->children[1], RNLStage::GoMiddle});
+          }
+          break;
+
+        case RNLStage::VisitLeft:
+          stage = RNLStage::GoLeft;
+          f(node->data[0]);
+          break;
+
+        case RNLStage::GoLeft:
+          stack.pop();
+          if (node->children[0]->is_3_node) {
+            stack.push({node->children[0], RNLStage::GoRight});
+          } else {
+            stack.push({node->children[0], RNLStage::GoMiddle});
+          }
+          break;
+      }
+    }
+
+    return f;
+  }
+
+  template < class Key, class Value, class Comparator >
+  template < class F >
+  F TwoThreeTree< Key, Value, Comparator >::traverse_breadth(F f)
+  {
+    return static_cast< const TwoThreeTree& >(*this).traverse_breadth(f);
+  }
+
+  template < class Key, class Value, class Comparator >
+  template < class F >
+  F TwoThreeTree< Key, Value, Comparator >::traverse_breadth(F f) const
+  {
+    if (empty()) {
+      return f;
+    }
+
+    Queue< Node* > queue;
+    queue.push(fake_->children[0]);
+
+    while (!queue.empty()) {
+      Node* current = queue.front();
+      queue.pop();
+
+      if (current == fake_) {
+        continue;
+      }
+
+      f(current->data[0]);
+      if (current->is_3_node) {
+        f(current->data[1]);
+      }
+
+      if (current->children[0] != fake_) {
+        queue.push(current->children[0]);
+      }
+      if (current->children[1] != fake_) {
+        queue.push(current->children[1]);
+      }
+      if (current->is_3_node && current->children[2] != fake_) {
+        queue.push(current->children[2]);
+      }
+    }
+
+    return f;
   }
 
   template < class Key, class Value, class Cmp >
