@@ -10,7 +10,9 @@ namespace {
   void loadDatasetsFromFile(const std::string& filename, gavrilova::Dataset& datasets)
   {
     std::ifstream file(filename);
-    if (!file) throw std::runtime_error("Failed to open file");
+    if (!file) {
+      throw std::runtime_error("Failed to open file");
+    }
 
     std::string datasetName;
     while (file >> datasetName) {
@@ -18,7 +20,9 @@ namespace {
       size_t key;
       while (file >> key) {
         std::string value;
-        if (!(file >> value)) throw std::runtime_error("Invalid data format");
+        if (!(file >> value)) {
+          throw std::runtime_error("Invalid data format");
+        }
         dataset.insert({key, value});
       }
       datasets.insert({datasetName, std::move(dataset)});

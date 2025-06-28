@@ -11,7 +11,6 @@ namespace rychkov
   {
   public:
     S4ParseProcessor(int argc, char** argv);
-
     bool print(ParserContext& context);
     bool make_complement(ParserContext& context);
     bool make_intersect(ParserContext& context);
