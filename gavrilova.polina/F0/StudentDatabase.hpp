@@ -2,10 +2,10 @@
 #define STUDENT_DATABASE_HPP
 
 #include <string>
-#include "Date.hpp"
-#include "Student.hpp"
 #include "Containers.hpp"
+#include "Date.hpp"
 #include "SharedPointer.hpp"
+#include "Student.hpp"
 
 namespace gavrilova {
 

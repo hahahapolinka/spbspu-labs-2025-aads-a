@@ -317,7 +317,7 @@ gavrilova::StudentDatabase::getStudentsInGroup(const std::string& groupName) con
       list.push_front(p.second);
     }
   };
-  
+
   it->second.traverse_rnl(StudentCollector{result});
   return result;
 }
